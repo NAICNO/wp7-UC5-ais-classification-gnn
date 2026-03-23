@@ -1,0 +1,142 @@
+# AIS Graph Classification - AI Agent Configuration
+metadata:
+  name: "AIS Graph Classification Demonstrator"
+  version: "1.0"
+  repository: "https://github.com/NAICNO/wp7-UC5-ais-classification-gnn"
+  documentation: "https://naicno.github.io/wp7-UC5-ais-classification-gnn/"
+  description: "Graph neural networks for classifying vessel fishing activities from AIS time-series data"
+
+prerequisites:
+  - "SSH access to NAIC VM (via orchestrator.naic.no)"
+  - "Python 3.10+"
+  - "GPU recommended (NVIDIA)"
+
+environment_check:
+  - command: "python3 --version"
+    expected: "Python 3.10+"
+  - command: "python -c 'import torch; import dgl; print(f\"PyTorch {torch.__version__}, DGL {dgl.__version__}\")'"
+    expected: "Version strings printed"
+  - command: "ls data/*.npy"
+    expected: "X_ts12.npy, y_ts12.npy, bidx_ts12.npy"
+
+vm_init:
+  script: "vm-init.sh"
+  description: "One-time VM initialization (installs system packages, CUDA setup)"
+  commands:
+    - "curl -O https://raw.githubusercontent.com/NAICNO/wp7-UC5-ais-classification-gnn/main/vm-init.sh"
+    - "chmod +x vm-init.sh"
+    - "./vm-init.sh"
+
+setup:
+  script: "setup.sh"
+  commands:
+    - "git clone https://github.com/NAICNO/wp7-UC5-ais-classification-gnn.git"
+    - "cd graph-based-classification-of-ais-time-series-data"
+    - "chmod +x setup.sh"
+    - "./setup.sh"
+    - "source venv/bin/activate"
+
+jupyter:
+  start: "jupyter lab --no-browser --ip=0.0.0.0 --port=8888"
+  tunnel_template: "ssh -v -N -L 8888:localhost:8888 -i YOUR_KEY_PATH ubuntu@YOUR_VM_IP"
+  tunnel_example: "ssh -v -N -L 8888:localhost:8888 -i ~/.ssh/naic-vm.pem ubuntu@10.212.136.52"
+  notebook: "notebooks/DGL_Demonstrator.ipynb"
+
+cli:
+  entry_point: "src/graph_classification/train_graph_classification_ais.py"
+  quick_test: "python src/graph_classification/train_graph_classification_ais.py --data_folder data/ --epochs 10 --patience 5 --batch_size 600"
+  full_training: "python src/graph_classification/train_graph_classification_ais.py --data_folder data/ --epochs 1000 --patience 200"
+  evaluation: "python src/graph_classification/eval_graph_classification_ais.py --data_folder data/ --model_path results/"
+
+parameters:
+  optional:
+    - name: "data_folder"
+      type: "string"
+      default: "../data/"
+      description: "Path to AIS data directory"
+    - name: "model_path"
+      type: "string"
+      default: "../results"
+      description: "Path to save/load trained models"
+    - name: "models"
+      type: "string"
+      default: "GCN, GSG, GAT"
+      description: "Comma-separated list of models to train"
+    - name: "lrs"
+      type: "string"
+      default: "5e-2, 3e-2, 1e-2"
+      description: "Comma-separated learning rates"
+    - name: "epochs"
+      type: "integer"
+      default: 1000
+      range: [10, 5000]
+      description: "Training epochs"
+    - name: "hidden"
+      type: "integer"
+      default: 32
+      choices: [16, 32, 64, 128, 256]
+      description: "Hidden layer dimension"
+    - name: "batch_size"
+      type: "integer"
+      default: 600
+      choices: [100, 300, 600, 1000, 4000]
+      description: "Training batch size"
+    - name: "patience"
+      type: "integer"
+      default: 200
+      range: [10, 500]
+      description: "Early stopping patience (epochs without improvement)"
+    - name: "gpu"
+      type: "integer"
+      default: 0
+      description: "GPU device index"
+
+models:
+  - name: "GCN"
+    class: "GCN"
+    type: "Graph Convolutional Network"
+    description: "Spectral-based graph convolutions with batch normalization"
+  - name: "GSG"
+    class: "GraphSAGE"
+    type: "Sample and Aggregate"
+    description: "Inductive learning via mean neighborhood aggregation"
+  - name: "GAT"
+    class: "GAT"
+    type: "Graph Attention Network"
+    description: "Multi-head attention-weighted neighbor aggregation"
+
+datasets:
+  - name: "X_ts12.npy"
+    purpose: "Features"
+    description: "AIS time-series data: (N, 3, 12) — velocity, distance to shore, curvature"
+  - name: "y_ts12.npy"
+    purpose: "Labels"
+    description: "Binary labels: 0 = non-fishing, 1 = fishing"
+  - name: "bidx_ts12.npy"
+    purpose: "Split indices"
+    description: "Bootstrap indices for train/val/test split (50 folds)"
+
+results:
+  best_model: "GraphSAGE (GSG)"
+  best_accuracy: 0.9445
+  best_learning_rate: 0.01
+
+troubleshooting:
+  - issue: "SSH Permission denied (publickey)"
+    solution: "Check key permissions: chmod 600 ~/.ssh/your-key.pem"
+  - issue: "DGL import error"
+    solution: "Run ./setup.sh to install compatible PyTorch + DGL versions"
+  - issue: "CUDA out of memory"
+    solution: "Reduce batch size: --batch_size 100"
+  - issue: "ModuleNotFoundError"
+    solution: "Activate venv: source venv/bin/activate"
+  - issue: "Data files not found"
+    solution: "Place X_ts12.npy, y_ts12.npy, bidx_ts12.npy in data/ directory"
+
+verification:
+  - step: "Tests pass"
+    command: "pytest tests/"
+    expected: "104 passed"
+  - step: "Models import"
+    command: "python -c 'from graph_classification.models import GCN, GAT, GraphSAGE; print(\"OK\")'"
+    expected: "OK"

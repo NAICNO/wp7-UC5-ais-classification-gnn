@@ -1,0 +1,11 @@
+# Test dependencies (CI-friendly, dgl tests skip gracefully)
+numpy<2
+matplotlib
+pandas
+scipy
+pydantic
+pyyaml
+setuptools
+packaging
+pytest
+pytest-cov

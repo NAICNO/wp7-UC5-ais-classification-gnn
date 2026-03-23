@@ -1,0 +1,3 @@
+# Enforce LF line endings for bash script files
+*.sh text eol=lf
+*.ipynb text eol=lf

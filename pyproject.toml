@@ -1,0 +1,55 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ais_dgl"
+version = "0.1.0"
+description = "A graph classification project using DGL"
+authors = [
+    { name="Xue-Cheng Tai", email="xtai@norceresearch.no" },
+    { name="Gro Fonnes", email="grfo@norceresearch.no" }
+]
+readme = "README.md"
+requires-python = ">=3.10"
+
+# Base dependencies (Common dependencies)
+dependencies = [
+    "ipykernel",
+    "matplotlib",
+    # dgl < 2.4 requires numpy<2
+    "numpy<2; sys_platform=='win32'",
+    "numpy>1; sys_platform!='win32'",
+    "ogb==1.3.6",
+    "packaging",
+    "pydantic",
+    "pyyaml",
+    "setuptools==74.1.2"
+]
+
+[project.optional-dependencies]
+# Dependencies for training and evaluation (CPU)
+cpu = [
+    # Use CPU version of DGL
+    "dgl==2.2.1; sys_platform=='win32'",
+    "dgl==2.4.0; sys_platform!='win32'",
+    # Use CPU version of PyTorch
+    "torch==2.3.0; sys_platform=='win32'",
+    "torch==2.4.0; sys_platform!='win32'"
+]
+
+# Dependencies for training with CUDA (GPU)
+gpu = [
+    # The latest version of available package is 2.2.1 for Windows and Mac
+    "dgl==2.2.1+cu118; sys_platform=='win32'",
+    "dgl==2.4.0+cu118; sys_platform!='win32'",
+    "nvidia-cuda-runtime-cu11",
+    "torch==2.3.0+cu118; sys_platform=='win32'",
+    "torch==2.4.0+cu118; sys_platform!='win32'"
+]
+
+[project.urls]
+Homepage = "https://gitlab.norceresearch.no/gnn/ais_dgl"
+
+[tool.setuptools.packages.find]
+where = ["src"]
