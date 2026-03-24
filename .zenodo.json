@@ -1,0 +1,26 @@
+{
+  "title": "NAIC WP7 UC5 — AIS Classification with Graph Neural Networks",
+  "description": "Graph neural network classification of AIS vessel trajectories. GraphSAGE achieves 94.4% accuracy on fishing vs non-fishing classification.",
+  "creators": [
+    {
+      "name": "Tai, Xue-Cheng",
+      "affiliation": "NORCE Norwegian Research Centre"
+    },
+    {
+      "name": "Fonnes, Gro",
+      "affiliation": "NORCE Norwegian Research Centre"
+    }
+  ],
+  "keywords": [
+    "GNN",
+    "maritime",
+    "AIS",
+    "vessel classification",
+    "NAIC WP7"
+  ],
+  "license": {
+    "id": "GPL-3.0-only"
+  },
+  "upload_type": "software",
+  "access_right": "open"
+}

@@ -1,0 +1,48 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.egg
+dist/
+build/
+*.so
+
+# Virtual environment
+venv/
+.venv/
+
+# Data and models
+*.npy
+*.pt
+*.bin
+*.pkl
+data/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Sphinx
+_build/
+public/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Pytest
+.pytest_cache/
+htmlcov/
+.coverage
+
+# Results (keep .gitkeep)
+results/*.pt
+results/*.json
+
+# Added for GitHub migration
+coverage.json
